@@ -27,11 +27,18 @@ public:
 private:
     Vector2 GetRandomPosition();
     bool GetRandomBool();
+
     bool bOn; 
-    int currentIt; 
-    int totalIts;
+    int currentFlashIt; 
+    int totalFlashIts;
+    int numLazers;
 
     int Score;
+
+    double waveCooldown;
+    double lazerFinishDelay;
+    double activateLazersDelay;
+    double lazerFlashDB;
 
     std::vector<Lazer*> activeLazers;
 };

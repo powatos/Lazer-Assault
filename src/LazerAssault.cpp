@@ -14,21 +14,28 @@ SET_DEFAULT_SUBCLASS(Gamemode, LazerAssault)
 
 LazerAssault::LazerAssault() {
     bOn = false;
-    currentIt = 0;
-    totalIts = 0;
+    currentFlashIt = 0;
+    totalFlashIts = 7;
+
     Score = 0;
+    numLazers = 5;
+
+    waveCooldown = 3.0;
+    lazerFinishDelay = 1.5;
+    activateLazersDelay = 1.0;
+    lazerFlashDB = 0.1;
+
 }
 
 void LazerAssault::BeginPlay() {
 
     TimerManager* tm = TimerManager::Get();
 
-    tm->AddTimer("waveDB", 3.0, this, &LazerAssault::StartWave);
+    tm->AddTimer("waveDB", waveCooldown, this, &LazerAssault::StartWave);
 }
 
 void LazerAssault::StartWave() {
 
-    const int numLazers = 5;
     const Vector2 lazerSize = Vector2(80, 1);
 
     World* world = GameInstance::Get()->GetWorld();
@@ -36,20 +43,20 @@ void LazerAssault::StartWave() {
 
     // spawn lazers
     for (int i{}; i < numLazers; ++i) {
-        const bool b = GetRandomBool();
-        const Vector2 size = b ? lazerSize : lazerSize.Swizzled();
+        const bool dir = GetRandomBool();
+        const Vector2 size = dir ? lazerSize : lazerSize.Swizzled();
         const Vector2 pos = GetRandomPosition();
-        const Vector2 spawnPos = b ? pos : pos.Swizzled()+Vector2(0,24);
+        const Vector2 spawnPos = dir ? pos : pos.Swizzled()+Vector2(0,24);
 
         Lazer* lazer = world->SpawnActor<Lazer>(spawnPos);
         lazer->SetSize(size);
+        lazer->Texture = dir ? '-' : '|';
 
         activeLazers.push_back(lazer);
     }
 
     bOn = true;
-    currentIt = 0;
-    totalIts = 5;
+    currentFlashIt = 0;
     Flash();
 
 }
@@ -63,11 +70,10 @@ void LazerAssault::ActivateLazers() {
         lazer->CheckCollisions = true;
     }
 
-    tm->AddTimer("waveFinishDelay", 1, this, &LazerAssault::FinishWave);
+    tm->AddTimer("waveFinishDelay", lazerFinishDelay, this, &LazerAssault::FinishWave);
 }
 
 void LazerAssault::Flash() {
-    LOG_DEFAULT(LogType::INFO, "{}", bOn);
 
     TimerManager* tm = TimerManager::Get();
     
@@ -75,14 +81,14 @@ void LazerAssault::Flash() {
         lazer->SetVisibility(bOn);
     }
 
-    if (++currentIt == totalIts) {
-        ActivateLazers();
+    if (++currentFlashIt == totalFlashIts) {
+        tm->AddTimer("activateLazers", activateLazersDelay, this, &LazerAssault::ActivateLazers);
         return;
     }
 
     bOn = !bOn;
     
-    tm->AddTimer("flashDebounce", 0.25, this, &LazerAssault::Flash);
+    tm->AddTimer("flashDebounce", lazerFlashDB, this, &LazerAssault::Flash);
 
 }
 
@@ -98,10 +104,11 @@ void LazerAssault::FinishWave() {
     }
 
     ++Score;
+    ++numLazers;
 
     if (Player* p = GameInstance::Get()->GetPlayerController()->GetPlayer(); p->GetHealth() > 0) {
         TimerManager* tm = TimerManager::Get();
-        tm->AddTimer("waveDB", 3.0, this, &LazerAssault::StartWave);
+        tm->AddTimer("waveDB", waveCooldown, this, &LazerAssault::StartWave);
     } else {
         GameInstance::Get()->RequestShutdown();
     }
@@ -114,7 +121,6 @@ Vector2 LazerAssault::GetRandomPosition() {
     static std::uniform_real_distribution<float> distribution(0.f, 1.f);
 
     return Vector2{
-        // distribution(generator) * 80,
         0.f,
         distribution(generator) * 24
     };

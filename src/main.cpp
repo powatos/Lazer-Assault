@@ -5,7 +5,6 @@
 #include <Game/World.hpp>
 #include <UI/HUDController.hpp>
 
-// #include "test.hpp"
 #include "UI/ScoreWidget.hpp"
 
 int main()
