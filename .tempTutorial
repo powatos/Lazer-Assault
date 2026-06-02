@@ -1,0 +1,150 @@
+@page tutorial Tutorial
+
+# Tutorial: Lazer Assault
+This page showcases the engine with a tutorial for a simple lazer obstacle game.
+
+@remark This page is incomplete while the engine is in development. Come back soon!
+
+## Game Overview
+
+* %Player can move around in a terminal sized world
+* Vertical and horizontal lazers appear, damaging the player
+* Lazers flicker twice before firing to allow player time to dodge
+* Game is over when player health reaches 0
+* Score is tracked by each wave avoided
+* Score is displayed on screen
+* Health is displayed on screen
+
+## Part 1. Setting up `main()`
+We use the template main function to initialize the engine with base specifications.
+
+* World size restricted
+* Gravity settings changed
+* Player spawn set
+```cpp
+int main()
+{
+    /// ENGINE SETUP
+    PotatoEngine& engine = PotatoEngine::Get();
+    engine.LoadSubobjects();
+    GameInstance* instance = GameInstance::get();
+    
+    // ENGINE SETTINGS
+    instance->MS_REPEAT_THRESHOLD = 195;
+    instance->FRAMES_PER_SECOND = 60.f;
+
+    /// LEVEL SETUP
+    [[maybe_unused]] World* world = instance->GetWorld();
+    PersistentLevel level("save1.json"); // default save
+    level.LoadStaticActors();
+
+    /// WORLD SETTINGS
+    world->Settings.Size = Vector2(80,24); // restrict level size
+    world->Settings.doGravity = false;
+
+    /// PLAYER SETUP
+    PlayerController* playerController = instance->GetPlayerController();
+    Player* player = playerController->GetPlayer();
+    player->SetPosition(Vector2(40,12)); // player spawns in the middle of world
+
+    player->Texture = 'P';
+
+    /// UI SETUP
+    [[maybe_unused]] IHUDController* HUDController = engine.GetHUDController();
+    // ScoreWidget* scoreWidget = HUDController->AddWidget<ScoreWidget>("ScoreWidget");
+
+    /// PLAY
+    engine.BeginPlay();
+
+    engine.Resolve();
+    
+
+    return 0;
+}
+```
+
+## Part 2. ScoreWidget class
+We need a widget to display the player's score on screen.
+
+`src/UI/ScoreWidget.hpp` and `src/UI/ScoreWidget.cpp` are created.
+
+* `ScoreWidget` is declared, inheriting from `Widget`
+    * Default constructor/destructor defined
+    * `IncrementScore()` method declared to update player score
+    * `UpdateScreen()` method declared to update the widget contents
+    * `Score` variable declared
+```cpp
+// ScoreWidget.hpp
+
+class ScoreWidget : public Widget
+{
+public:
+    ScoreWidget(std::string UID);
+    virtual ~ScoreWidget() noexcept = default;
+
+    void IncrementScore();
+private:
+    int Score;
+
+    void UpdateScreen();
+};
+```
+Our constructor must call the parent constructor to instantiate properly. Score is default-initialized. A `TextElement` is added to the widget to display the score text, and its settings are updated.
+
+`IncrementScore()` should be called every time there a wave completes. We will setup an event binding later.
+```cpp
+// GameManager.cpp
+
+ScoreWidget::ScoreWidget(std::string UID) : Widget(UID) {
+    Score = 0;
+
+    TextElement* scoreDisplay = AddElement<TextElement>("scoreDisplay");
+    scoreDisplay->SetScreenPosition(Vector2(0,0));
+    scoreDisplay->SetScreenSize(Vector2(10,1));
+    scoreDisplay->field = "Score: .";
+    scoreDisplay->SetVisibility(true);
+
+}
+```
+The `IncrementScore()` method increments and immediately updates the screen.
+```cpp
+// GameManager.cpp
+
+void ScoreWidget::IncrementScore() {
+    ++Score;
+    UpdateScreen();
+}
+```
+The `UpdateScreen()` method gets the display element by name and updates its field
+```cpp
+// GameManager.cpp
+
+void ScoreWidget::UpdateScreen() {
+    TextElement* scoreDisplay = dynamic_cast<TextElement*>(GetElement("scoreDisplay"));
+    scoreDisplay->field = "Score: " + std::to_string(Score);
+}
+```
+
+## Part 3.
+We will create the main gameplay routing class, `LazerAssault`. The header and code at placed at `src/LazerAssault.hpp` and `src/LazerAssault.cpp`, respectively.
+```cpp
+// LazerAssault.hpp
+
+class LazerAssault : public Gamemode
+{
+public: 
+    LazerAssault() = default;
+    ~LazerAssault() = default;
+
+    virtual void BeginPlay() override;
+
+    void DoWave();
+};
+```
+
+```cpp
+// LazerAssault.cpp
+
+
+```
+## Part 4.
