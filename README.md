@@ -10,3 +10,8 @@ Live as long as you can and get a high score! Lazers activate periodically and c
 ## Controls
 Use `WASD` to move player in cardinal directions  
 Press `Escape` to quit the game at any time
+
+## AI Usage
+Generative AI was not utilized in development of Lazer Assault.
+
+Note: This excludes AI-enhanced features like VSCode's inline suggestions feature, which was used
