@@ -10,7 +10,5 @@ public:
 
 protected:
     virtual void Tick([[maybe_unused]] float dt) override;
-
-private:
     
 };

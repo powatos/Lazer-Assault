@@ -11,7 +11,7 @@ SET_DEFAULT_SUBCLASS(PlayerController, CharacterController)
 
 CharacterController::CharacterController() {
     moveSpeed = 1.f;
-    CameraFollow = false;
+    CameraFollowsPlayer = false;
 }
 
 void CharacterController::SetupInputBindings() {
@@ -20,10 +20,10 @@ void CharacterController::SetupInputBindings() {
     IInputController* controller = PotatoEngine::Get().GetInputController();
 
     controller->RegisterInputBinding({
-        InputBinding(Keycode::W, InputType::Triggered, "MoveUp", this, &CharacterController::moveUp),
-        InputBinding(Keycode::S, InputType::Triggered, "MoveDown", this, &CharacterController::moveDown),
-        InputBinding(Keycode::A, InputType::Triggered, "MoveLeft", this, &CharacterController::moveLeft),
-        InputBinding(Keycode::D, InputType::Triggered, "MoveRight", this, &CharacterController::moveRight),
+        InputBinding(Keycode::W, InputType::Impulse, "MoveUp", this, &CharacterController::moveUp),
+        InputBinding(Keycode::S, InputType::Impulse, "MoveDown", this, &CharacterController::moveDown),
+        InputBinding(Keycode::A, InputType::Impulse, "MoveLeft", this, &CharacterController::moveLeft),
+        InputBinding(Keycode::D, InputType::Impulse, "MoveRight", this, &CharacterController::moveRight),
     });
 
 }

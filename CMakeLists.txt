@@ -12,7 +12,7 @@ include(FetchContent)
 FetchContent_Declare(
     PotatoEngine
     GIT_REPOSITORY https://github.com/powatos/Potato-Engine.git
-    GIT_TAG v1.4-pre
+    GIT_TAG v1.5.1-alpha
 )
 FetchContent_MakeAvailable(PotatoEngine)
 

@@ -2,6 +2,8 @@
 #include <UI/Widgets/TextElement.hpp>
 #include <Core/Control/GameInstance.hpp>
 
+#include <Debug/Debug.hpp>
+
 #include "LazerAssault.hpp"
 #include "ScoreWidget.hpp"
 
@@ -19,7 +21,11 @@ ScoreWidget::ScoreWidget(std::string UID) : Widget(UID) {
     healthDisplay->field = "Health: .";
     healthDisplay->SetVisibility(true);
 
+    SetScreenPosition(Vector2());
+    SetVisibility(true);
     SetTicking(true);
+    LOG_DEFAULT(LogType::DEBUG, "scorewidget created");
+
 }
 
 void ScoreWidget::Tick([[maybe_unused]] float dt) {
@@ -33,5 +39,6 @@ void ScoreWidget::Tick([[maybe_unused]] float dt) {
     
     scoreDisplay->field = "Score: " + std::to_string(Score);
     healthDisplay->field = "Health: " + std::to_string(static_cast<int>(player->GetHealth()));
+    LOG_DEFAULT(LogType::DEBUG, "scorewidget ticked");
 
 }
